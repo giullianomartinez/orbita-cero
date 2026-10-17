@@ -1,44 +1,42 @@
 package puppy.code;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
 
 
 public class Ball2 {
-	private int x;
-    private int y;
+    private float x;
+    private float y;
     private int xSpeed;
     private int ySpeed;
     private Sprite spr;
 
     public Ball2(int x, int y, int size, int xSpeed, int ySpeed, Texture tx) {
     	spr = new Sprite(tx);
-    	this.x = x; 
- 	
-        //validar que borde de esfera no quede fuera
-    	if (x-size < 0) this.x = x+size;
-    	if (x+size > Gdx.graphics.getWidth())this.x = x-size;
-         
-        this.y = y;
-        //validar que borde de esfera no quede fuera
-    	if (y-size < 0) this.y = y+size;
-    	if (y+size > Gdx.graphics.getHeight())this.y = y-size;
-    	
-        spr.setPosition(x, y);
+        spr.setSize(size * 2, size * 2);
+        this.x = MathUtils.clamp(x, 0, AreaJuego.ANCHO - spr.getWidth());
+        this.y = MathUtils.clamp(y, 0, AreaJuego.ALTO - spr.getHeight());
+        spr.setPosition(this.x, this.y);
         this.setXSpeed(xSpeed);
         this.setySpeed(ySpeed);
     }
-    public void update() {
-        x += getXSpeed();
-        y += getySpeed();
+    public void update(float delta) {
+        float paso = Math.min(delta, 0.05f) * 60;
+        x += getXSpeed() * paso;
+        y += getySpeed() * paso;
 
-        if (x+getXSpeed() < 0 || x+getXSpeed()+spr.getWidth() > Gdx.graphics.getWidth())
-        	setXSpeed(getXSpeed() * -1);
-        if (y+getySpeed() < 0 || y+getySpeed()+spr.getHeight() > Gdx.graphics.getHeight())
-        	setySpeed(getySpeed() * -1);
+        if (x < 0 || x + spr.getWidth() > AreaJuego.ANCHO) {
+            x = MathUtils.clamp(x, 0, AreaJuego.ANCHO - spr.getWidth());
+            setXSpeed(-getXSpeed());
+        }
+        if (y < 0 || y + spr.getHeight() > AreaJuego.ALTO) {
+            y = MathUtils.clamp(y, 0, AreaJuego.ALTO - spr.getHeight());
+            setySpeed(-getySpeed());
+        }
         spr.setPosition(x, y);
     }
     
@@ -50,18 +48,39 @@ public class Ball2 {
     }
     
     public void checkCollision(Ball2 b2) {
-        if(spr.getBoundingRectangle().overlaps(b2.spr.getBoundingRectangle())){
-        	// rebote
-            if (getXSpeed() ==0) setXSpeed(getXSpeed() + b2.getXSpeed()/2);
-            if (b2.getXSpeed() ==0) b2.setXSpeed(b2.getXSpeed() + getXSpeed()/2);
-        	setXSpeed(- getXSpeed());
-            b2.setXSpeed(-b2.getXSpeed());
-            
-            if (getySpeed() ==0) setySpeed(getySpeed() + b2.getySpeed()/2);
-            if (b2.getySpeed() ==0) b2.setySpeed(b2.getySpeed() + getySpeed()/2);
-            setySpeed(- getySpeed());
-            b2.setySpeed(- b2.getySpeed()); 
+        Rectangle a = spr.getBoundingRectangle();
+        Rectangle b = b2.spr.getBoundingRectangle();
+        Vector2 desplazamiento = ColisionAsteroides.desplazamiento(a, b);
+        if (desplazamiento.isZero()) return;
+        Vector2[] separaciones = ColisionAsteroides.separaciones(
+            a, b, AreaJuego.ANCHO, AreaJuego.ALTO
+        );
+
+        if (desplazamiento.x != 0) {
+            x += separaciones[0].x;
+            b2.x += separaciones[1].x;
+            float direccion = Math.signum(desplazamiento.x);
+            int[] velocidades = ColisionAsteroides.velocidadesTrasChoque(
+                xSpeed, b2.xSpeed, direccion
+            );
+            xSpeed = velocidades[0];
+            b2.xSpeed = velocidades[1];
+        } else {
+            y += separaciones[0].y;
+            b2.y += separaciones[1].y;
+            float direccion = Math.signum(desplazamiento.y);
+            int[] velocidades = ColisionAsteroides.velocidadesTrasChoque(
+                ySpeed, b2.ySpeed, direccion
+            );
+            ySpeed = velocidades[0];
+            b2.ySpeed = velocidades[1];
         }
+        x = MathUtils.clamp(x, 0, AreaJuego.ANCHO - spr.getWidth());
+        y = MathUtils.clamp(y, 0, AreaJuego.ALTO - spr.getHeight());
+        b2.x = MathUtils.clamp(b2.x, 0, AreaJuego.ANCHO - b2.spr.getWidth());
+        b2.y = MathUtils.clamp(b2.y, 0, AreaJuego.ALTO - b2.spr.getHeight());
+        spr.setPosition(x, y);
+        b2.spr.setPosition(b2.x, b2.y);
     }
 	public int getXSpeed() {
 		return xSpeed;

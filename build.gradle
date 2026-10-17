@@ -58,7 +58,7 @@ configure(subprojects) {
 
 subprojects {
   version = '$projectVersion'
-  ext.appName = 'SpaceNav2024'
+  ext.appName = 'OrbitaCero'
   repositories {
     mavenCentral()
     maven { url 'https://s01.oss.sonatype.org' }
@@ -70,4 +70,4 @@ subprojects {
   }
 }
 
-eclipse.project.name = 'SpaceNav2024' + '-parent'
+eclipse.project.name = 'OrbitaCero-parent'
