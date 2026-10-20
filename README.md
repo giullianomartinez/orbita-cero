@@ -12,14 +12,14 @@ En desarrollo.
 
 ## Tecnologías
 
-- Java 11
+- Java
 - libGDX
 - LWJGL3
 - Gradle
 
 ## Ejecución
 
-Se requiere tener **Java 11** instalado.
+Se requiere tener **Java** instalado.
 
 ### Windows
 
