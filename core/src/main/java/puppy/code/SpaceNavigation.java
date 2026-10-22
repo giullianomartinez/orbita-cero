@@ -54,8 +54,8 @@ public class SpaceNavigation extends Game {
 		return highScore;
 	}
 
-	public void setHighScore(int highScore) {
-		this.highScore = highScore;
+	public void registrarPuntaje(int puntaje) {
+		if (puntaje > highScore) highScore = puntaje;
 	}
 	
 	

@@ -1,6 +1,5 @@
 package puppy.code;
 
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -8,26 +7,21 @@ import com.badlogic.gdx.math.Vector2;
 import puppy.code.input.ControlesNave;
 import puppy.code.input.EntradaNave;
 
-public class Nave4 {
+public class Nave {
 
     private final Health health;
     private final ControlesNave controles;
     private static final float INTERVALO_DISPARO = 0.22f;
     private float tiempoDisparo;
     private Sprite spr;
-    private Sound sonidoHerido;
-    private Sound soundBala;
-    private Texture txBala;
+    private final ServiciosNave servicios;
 
-    public Nave4(int x, int y, Texture tx, Sound soundChoque,
-                 Texture txBala, Sound soundBala, int vidasIniciales,
+    Nave(int x, int y, Texture tx, ServiciosNave servicios, int vidasIniciales,
                  ControlesNave controles) {
         health = new Health(vidasIniciales);
         this.controles = controles;
 
-        sonidoHerido = soundChoque;
-        this.soundBala = soundBala;
-        this.txBala = txBala;
+        this.servicios = servicios;
 
         spr = new Sprite(tx);
         spr.setPosition(x, y);
@@ -35,7 +29,7 @@ public class Nave4 {
         spr.setOriginCenter();
     }
 
-    public void update(float delta, PantallaJuego juego) {
+    public void update(float delta, ReceptorDisparos receptor) {
         EntradaNave entrada = controles.leer();
         tiempoDisparo = Math.max(0, tiempoDisparo - delta);
         Vector2 posicion = MovimientoNave.posicionSiguiente(
@@ -59,15 +53,14 @@ public class Nave4 {
             );
             if (velocidad.isZero()) return;
 
-            Bullet bala = new Bullet(
+            Bullet bala = servicios.crearBala(
                 origenX,
                 origenY,
                 velocidad.x,
-                velocidad.y,
-                txBala
+                velocidad.y
             );
-            juego.agregarBala(bala);
-            soundBala.play();
+            receptor.agregarBala(bala);
+            servicios.reproducirDisparo();
             tiempoDisparo = INTERVALO_DISPARO;
         }
     }
@@ -78,7 +71,7 @@ public class Nave4 {
         spr.setAlpha(1f);
     }
 
-    public boolean checkCollision(Ball2 b) {
+    public boolean checkCollision(Asteroide b) {
         boolean hayColision =
             b.getArea().overlaps(spr.getBoundingRectangle());
 
@@ -86,11 +79,9 @@ public class Nave4 {
             return false;
         }
 
-        b.setXSpeed(-b.getXSpeed());
+        b.rebotarPorImpacto();
 
-        b.setySpeed(-b.getySpeed());
-
-        sonidoHerido.play();
+        servicios.reproducirHerida();
         return true;
     }
 

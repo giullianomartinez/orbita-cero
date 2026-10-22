@@ -6,7 +6,7 @@ import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Disposable;
 
-public final class RecursosJuego implements Disposable {
+public final class RecursosJuego implements Disposable, ServiciosNave {
     private final Texture nave;
     private final Texture bala;
     private final Texture asteroide;
@@ -52,11 +52,21 @@ public final class RecursosJuego implements Disposable {
         musica = musicaJuego;
     }
 
-    public Texture nave() { return nave; }
-    public Texture bala() { return bala; }
-    public Texture asteroide() { return asteroide; }
-    public Sound herida() { return herida; }
-    public Sound disparo() { return disparo; }
+    public Nave crearNave(int x, int y, int vidas, puppy.code.input.ControlesNave controles) {
+        return new Nave(x, y, nave, this, vidas, controles);
+    }
+
+    public Asteroide crearAsteroide(int x, int y, int tamano, int velocidadX, int velocidadY) {
+        return new Asteroide(x, y, tamano, velocidadX, velocidadY, asteroide);
+    }
+
+    @Override
+    public Bullet crearBala(float x, float y, float velocidadX, float velocidadY) {
+        return new Bullet(x, y, velocidadX, velocidadY, bala);
+    }
+
+    @Override public void reproducirDisparo() { disparo.play(); }
+    @Override public void reproducirHerida() { herida.play(); }
 
     public void reproducirMusica() {
         if (!musica.isPlaying()) musica.play();
