@@ -12,6 +12,7 @@ public class SpaceNavigation extends Game {
 	private String nombreJuego = "Space Navigation";
 	private SpriteBatch batch;
 	private BitmapFont font;
+	private RecursosJuego recursos;
 	private int highScore;	
 
 	public void create() {
@@ -19,6 +20,7 @@ public class SpaceNavigation extends Game {
 		batch = new SpriteBatch();
 		font = new BitmapFont(); // usa Arial font x defecto
 		font.getData().setScale(2f);
+		recursos = new RecursosJuego();
 		Screen ss = new PantallaMenu(this);
 		this.setScreen(ss);
 	}
@@ -28,8 +30,16 @@ public class SpaceNavigation extends Game {
 	}
 
 	public void dispose() {
-		batch.dispose();
+		if (getScreen() != null) {
+			getScreen().dispose();
+		}
+		recursos.dispose();
 		font.dispose();
+		batch.dispose();
+	}
+
+	public RecursosJuego getRecursos() {
+		return recursos;
 	}
 
 	public SpriteBatch getBatch() {

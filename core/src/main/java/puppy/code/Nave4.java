@@ -78,13 +78,6 @@ public class Nave4 {
         spr.setAlpha(1f);
     }
 
-    public void dispose() {
-        sonidoHerido.dispose();
-        soundBala.dispose();
-        txBala.dispose();
-        spr.getTexture().dispose();
-    }
-
     public boolean checkCollision(Ball2 b) {
         boolean hayColision =
             b.getArea().overlaps(spr.getBoundingRectangle());
@@ -102,7 +95,7 @@ public class Nave4 {
     }
 
     public boolean estaDestruido() {
-        return health.isDestroyed() && !health.isProtected();
+        return health.isDestroyed();
     }
 
     public boolean estaHerido() {
