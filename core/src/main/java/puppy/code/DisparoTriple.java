@@ -20,22 +20,22 @@ public class DisparoTriple implements EstrategiaDisparo {
 
     @Override
     public List<Bullet> crearDisparos(float origenX, float origenY, float objetivoX, float objetivoY, float rapidezBala, Texture txBala, boolean origenJugador) {
-
+        
         List<Bullet> disparos = new ArrayList<>();
-
+        
         Vector2 velocidadCentral = DireccionDisparo.velocidad(origenX, origenY, objetivoX, objetivoY, rapidezBala);
-
+        
         if(velocidadCentral.isZero()){
             return disparos;
         }
-
+        
         //disparo central
         disparos.add(new Bullet(origenX, origenY, velocidadCentral.x, velocidadCentral.y, txBala, origenJugador));
-
+        
         //disparo izquierdo
         Vector2 velocidadIzquierda = velocidadCentral.cpy().rotateDeg(-anguloDispersion);
         disparos.add(new Bullet(origenX, origenY, velocidadIzquierda.x, velocidadIzquierda.y, txBala, origenJugador));
-
+        
         //disparo derecho
         Vector2 velocidadDerecha = velocidadCentral.cpy().rotateDeg(anguloDispersion);
         disparos.add(new Bullet(origenX, origenY, velocidadDerecha.x, velocidadDerecha.y, txBala, origenJugador));

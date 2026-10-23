@@ -6,56 +6,71 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 
-/** Proyectil que conserva su origen y expone una colisión común para las naves. */
-public final class Bullet implements Colisionable {
-    private final float velocidadX;
-    private final float velocidadY;
+public class Bullet implements Colisionable {
+    private float xSpeed;
+    private float ySpeed;
+    private boolean destroyed = false;
     private final boolean origenJugador;
-    private final Sprite sprite;
-    private boolean destruida;
+    private Sprite spr;
 
-    public Bullet(float centroX, float centroY, float velocidadX, float velocidadY,
-                  Texture textura) {
-        this(centroX, centroY, velocidadX, velocidadY, textura, true);
+    public Bullet(float centroX, float centroY, float xSpeed, float ySpeed, Texture tx) {
+        this(centroX, centroY, xSpeed, ySpeed, tx, true);
     }
 
-    public Bullet(float centroX, float centroY, float velocidadX, float velocidadY,
-                  Texture textura, boolean origenJugador) {
-        this.velocidadX = velocidadX;
-        this.velocidadY = velocidadY;
+    public Bullet(float centroX, float centroY, float xSpeed, float ySpeed, Texture tx, boolean origenJugador) {
+        this.xSpeed = xSpeed;
+        this.ySpeed = ySpeed;
         this.origenJugador = origenJugador;
-        sprite = new Sprite(textura);
-        sprite.setPosition(centroX - sprite.getWidth() / 2f,
-            centroY - sprite.getHeight() / 2f);
-        sprite.setOriginCenter();
-        sprite.setRotation(MathUtils.atan2(velocidadY, velocidadX)
-            * MathUtils.radiansToDegrees - 90f);
-        if (!origenJugador) sprite.setColor(1f, 0.35f, 0.25f, 1f);
-    }
-
-    public void update(float delta) {
-        if (destruida || !Float.isFinite(delta) || delta <= 0) return;
-        sprite.setPosition(sprite.getX() + velocidadX * delta,
-            sprite.getY() + velocidadY * delta);
-        if (sprite.getX() < 0 || sprite.getX() + sprite.getWidth() > AreaJuego.ANCHO
-                || sprite.getY() < 0
-                || sprite.getY() + sprite.getHeight() > AreaJuego.ALTO) {
-            destruir();
+        spr = new Sprite(tx);
+        spr.setPosition(centroX - spr.getWidth() / 2f, centroY - spr.getHeight() / 2f);
+        spr.setOriginCenter();
+        spr.setRotation(MathUtils.atan2(ySpeed, xSpeed) * MathUtils.radiansToDegrees - 90f);
+        if (!origenJugador) {
+            spr.setColor(1.0f, 0.35f, 0.25f, 1.0f);
         }
     }
 
-    public void draw(SpriteBatch batch) { if (!destruida) sprite.draw(batch); }
-
-    public boolean checkCollision(Colisionable objetivo) {
-        if (!colisionaCon(objetivo)) return false;
-        destruir();
-        return true;
+    public void update(float delta) {
+        spr.setPosition(spr.getX() + xSpeed * delta, spr.getY() + ySpeed * delta);
+        if (spr.getX() < 0 || spr.getX() + spr.getWidth() > AreaJuego.ANCHO) {
+            destroyed = true;
+        }
+        if (spr.getY() < 0 || spr.getY() + spr.getHeight() > AreaJuego.ALTO) {
+            destroyed = true;
+        }
     }
 
-    public void destruir() { destruida = true; }
-    public boolean isDestroyed() { return destruida; }
-    public boolean esOrigenJugador() { return origenJugador; }
+    public void draw(SpriteBatch batch) {
+        spr.draw(batch);
+    }
 
-    @Override public Rectangle getArea() { return new Rectangle(sprite.getBoundingRectangle()); }
-    @Override public boolean estaDestruido() { return destruida; }
+    public boolean checkCollision(Colisionable objetivo) {
+        if (this.colisionaCon(objetivo)) {
+            this.destroyed = true;
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public Rectangle getArea() {
+        return spr.getBoundingRectangle();
+    }
+
+    @Override
+    public boolean estaDestruido() {
+        return destroyed;
+    }
+
+    public boolean isDestroyed() {
+        return destroyed;
+    }
+
+    public void setDestroyed(boolean destroyed) {
+        this.destroyed = destroyed;
+    }
+
+    public boolean esOrigenJugador() {
+        return origenJugador;
+    }
 }

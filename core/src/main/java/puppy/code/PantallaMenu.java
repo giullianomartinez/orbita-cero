@@ -1,47 +1,80 @@
 package puppy.code;
 
-import java.util.Objects;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.utils.ScreenUtils;
 
-/** Menú inicial del juego. */
-public final class PantallaMenu implements Screen {
-    private final SpaceNavigation game;
-    private final OrthographicCamera camera;
 
-    public PantallaMenu(SpaceNavigation game) {
-        this.game = Objects.requireNonNull(game, "game");
-        camera = new OrthographicCamera();
-        camera.setToOrtho(false, AreaJuego.ANCHO, AreaJuego.ALTO);
-    }
+public class PantallaMenu implements Screen {
 
-    @Override
-    public void render(float delta) {
-        ScreenUtils.clear(0, 0, 0.2f, 1);
-        camera.update();
-        game.getBatch().setProjectionMatrix(camera.combined);
-        game.getBatch().begin();
-        game.getFont().draw(game.getBatch(), "Orbita Cero", 140, 440);
-        game.getFont().draw(game.getBatch(), "WASD: mover   Mouse: apuntar   Clic izquierdo: disparar", 100, 360);
-        game.getFont().draw(game.getBatch(), "Destruye las naves enemigas y sobrevive a cada ronda.", 100, 310);
-        game.getFont().draw(game.getBatch(), "Haz clic o presiona cualquier tecla para comenzar", 100, 250);
-        game.getBatch().end();
+	private SpaceNavigation game;
+	private OrthographicCamera camera;
 
-        if (Gdx.input.isTouched() || Gdx.input.isKeyJustPressed(Input.Keys.ANY_KEY)) {
-            Screen siguiente = new PantallaJuegoBuilder(game).build();
-            siguiente.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-            game.setScreen(siguiente);
-            dispose();
-        }
-    }
+	public PantallaMenu(SpaceNavigation game) {
+		this.game = game;
+        
+		camera = new OrthographicCamera();
+		camera.setToOrtho(false, 1200, 800);
+	}
 
-    @Override public void show() { }
-    @Override public void resize(int width, int height) { }
-    @Override public void pause() { }
-    @Override public void resume() { }
-    @Override public void hide() { }
-    @Override public void dispose() { }
+	@Override
+	public void render(float delta) {
+		ScreenUtils.clear(0, 0, 0.2f, 1);
+
+		camera.update();
+		game.getBatch().setProjectionMatrix(camera.combined);
+
+		game.getBatch().begin();
+		game.getFont().draw(game.getBatch(), "Bienvenido a Orbita Cero", 140, 400);
+		game.getFont().draw(game.getBatch(), "WASD: mover   Mouse: apuntar   Clic izquierdo: disparar", 100, 330);
+		game.getFont().draw(game.getBatch(), "Haz clic o presiona cualquier tecla para comenzar ...", 100, 270);
+	
+		game.getBatch().end();
+
+		if (Gdx.input.isTouched() || Gdx.input.isKeyJustPressed(Input.Keys.ANY_KEY)) {
+			Screen ss = new PantallaJuegoBuilder(game).build();
+			ss.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+			game.setScreen(ss);
+			dispose();
+		}
+	}
+	
+	@Override
+	public void show() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void resize(int width, int height) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void pause() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void resume() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void hide() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void dispose() {
+		// TODO Auto-generated method stub
+		
+	}
+   
 }
