@@ -1,8 +1,12 @@
 package puppy.code;
 
-/** Operaciones que la nave necesita del propietario de los recursos. */
+import java.util.List;
+
+/** Servicios externos que las naves necesitan para producir disparos y sonidos. */
 public interface ServiciosNave {
-    Bullet crearBala(float x, float y, float velocidadX, float velocidadY);
+    List<Bullet> crearDisparos(float origenX, float origenY, float objetivoX,
+        float objetivoY, float rapidez, EstrategiaDisparo estrategia,
+        boolean origenJugador);
     void reproducirDisparo();
     void reproducirHerida();
 }

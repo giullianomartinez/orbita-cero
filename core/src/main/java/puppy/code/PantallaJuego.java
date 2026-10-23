@@ -1,5 +1,6 @@
 package puppy.code;
 
+import java.util.Objects;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
@@ -9,8 +10,8 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import puppy.code.input.ControlesTecladoNave;
 
-/** Presenta la partida y gestiona los cambios de pantalla. */
-public class PantallaJuego implements Screen {
+/** Presenta la ronda y delega las reglas a Partida. */
+public final class PantallaJuego implements Screen {
     private final SpaceNavigation game;
     private final OrthographicCamera camera;
     private final Viewport viewport;
@@ -19,20 +20,24 @@ public class PantallaJuego implements Screen {
     private final Partida partida;
 
     public PantallaJuego(SpaceNavigation game, EstadoPartida estado) {
-        this.game = game;
-        this.estado = estado;
+        this.game = Objects.requireNonNull(game, "game");
+        this.estado = Objects.requireNonNull(estado, "estado");
         batch = game.getBatch();
         camera = new OrthographicCamera();
         viewport = new FitViewport(AreaJuego.ANCHO, AreaJuego.ALTO, camera);
         viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
-        partida = new Partida(estado, game.getRecursos(), new ControlesTecladoNave(viewport));
+        partida = new Partida(estado, game.getRecursos(),
+            new ControlesTecladoNave(viewport));
     }
 
     private void dibujarEncabezado() {
         game.getFont().getData().setScale(2f);
-        game.getFont().draw(batch, "Vidas: " + partida.vidas() + " Ronda: " + estado.ronda(), 10, 30);
-        game.getFont().draw(batch, "Score:" + partida.puntaje(), AreaJuego.ANCHO - 150, 30);
-        game.getFont().draw(batch, "HighScore:" + game.getHighScore(), AreaJuego.ANCHO / 2 - 100, 30);
+        game.getFont().draw(batch, "Vidas: " + partida.vidas()
+            + "  Ronda: " + estado.ronda(), 10, 30);
+        game.getFont().draw(batch, "Puntaje: " + partida.puntaje(),
+            AreaJuego.ANCHO - 210, 30);
+        game.getFont().draw(batch, "Récord: " + game.getHighScore(),
+            AreaJuego.ANCHO / 2f - 70, 30);
     }
 
     @Override
@@ -53,8 +58,9 @@ public class PantallaJuego implements Screen {
             game.registrarPuntaje(partida.puntaje());
             cambiarPantalla(new PantallaGameOver(game));
         } else if (partida.rondaCompletada()) {
-            cambiarPantalla(new PantallaJuego(game,
-                estado.siguienteRonda(partida.vidas(), partida.puntaje())));
+            EstadoPartida siguiente = estado.siguienteRonda(
+                partida.vidas(), partida.puntaje());
+            cambiarPantalla(new PantallaJuegoBuilder(game, siguiente).build());
         }
     }
 
@@ -69,5 +75,5 @@ public class PantallaJuego implements Screen {
     @Override public void pause() { }
     @Override public void resume() { }
     @Override public void hide() { }
-    @Override public void dispose() { /* Recursos compartidos: propiedad de RecursosJuego. */ }
+    @Override public void dispose() { }
 }

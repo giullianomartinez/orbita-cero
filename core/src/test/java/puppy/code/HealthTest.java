@@ -7,7 +7,7 @@ import static org.junit.Assert.assertTrue;
 
 public class HealthTest {
     @Test
-    public void ultimaVidaSePierdeAunqueComienceLaProteccion() {
+    public void destruccionTerminalCoexisteConLaProteccionVisual() {
         Health health = new Health(1);
 
         assertTrue(health.hit());

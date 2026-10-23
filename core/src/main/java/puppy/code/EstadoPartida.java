@@ -1,17 +1,32 @@
 package puppy.code;
 
-/** Datos y reglas para iniciar una partida y avanzar de ronda. */
+/** Configuración inmutable de una ronda y reglas para avanzar a la siguiente. */
 public final class EstadoPartida {
-    private final int ronda, vidas, puntaje, velocidadX, velocidadY, asteroides;
+    private final int ronda;
+    private final int vidas;
+    private final int puntaje;
+    private final int velocidadX;
+    private final int velocidadY;
+    private final int navesEnemigas;
 
     private EstadoPartida(int ronda, int vidas, int puntaje, int velocidadX,
-                          int velocidadY, int asteroides) {
+                          int velocidadY, int navesEnemigas) {
+        if (ronda < 1 || vidas < 0 || puntaje < 0 || velocidadX < 1
+                || velocidadY < 1 || navesEnemigas < 1) {
+            throw new IllegalArgumentException("Estado de partida inválido");
+        }
         this.ronda = ronda;
         this.vidas = vidas;
         this.puntaje = puntaje;
         this.velocidadX = velocidadX;
         this.velocidadY = velocidadY;
-        this.asteroides = asteroides;
+        this.navesEnemigas = navesEnemigas;
+    }
+
+    static EstadoPartida crear(int ronda, int vidas, int puntaje, int velocidadX,
+                               int velocidadY, int navesEnemigas) {
+        return new EstadoPartida(ronda, vidas, puntaje, velocidadX,
+            velocidadY, navesEnemigas);
     }
 
     public static EstadoPartida nuevaPartida() {
@@ -21,7 +36,7 @@ public final class EstadoPartida {
     public EstadoPartida siguienteRonda(int vidasRestantes, int puntajeActual) {
         return new EstadoPartida(ronda + 1, vidasRestantes, puntajeActual,
             Math.min(velocidadX + 1, 4), Math.min(velocidadY + 1, 4),
-            Math.min(asteroides + 10, 20));
+            Math.min(navesEnemigas + 2, 40));
     }
 
     public int ronda() { return ronda; }
@@ -29,5 +44,5 @@ public final class EstadoPartida {
     public int puntaje() { return puntaje; }
     public int velocidadX() { return velocidadX; }
     public int velocidadY() { return velocidadY; }
-    public int asteroides() { return asteroides; }
+    public int navesEnemigas() { return navesEnemigas; }
 }

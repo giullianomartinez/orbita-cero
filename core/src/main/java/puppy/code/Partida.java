@@ -1,68 +1,95 @@
 package puppy.code;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import puppy.code.input.ControlesNave;
 
-/** Mantiene las entidades y resuelve las reglas de una ronda. */
+/** Coordina entidades, colisiones, puntaje y avance de ronda. */
 public final class Partida implements ReceptorDisparos {
-    private final ArrayList<Asteroide> asteroides = new ArrayList<>();
-    private final ArrayList<Bullet> balas = new ArrayList<>();
+    private final List<NaveEnemiga> enemigos = new ArrayList<>();
+    private final List<Bullet> balas = new ArrayList<>();
     private final Nave nave;
-    private final RecursosJuego recursos;
+    private final ServiciosPartida recursos;
     private int puntaje;
 
-    public Partida(EstadoPartida estado, RecursosJuego recursos, ControlesNave controles) {
-        this.recursos = recursos;
-        this.puntaje = estado.puntaje();
-        nave = recursos.crearNave(400 - 22, 30, estado.vidas(), controles);
-        Random azar = new Random();
-        for (int i = 0; i < estado.asteroides(); i++) {
-            asteroides.add(recursos.crearAsteroide(azar.nextInt(AreaJuego.ANCHO),
-                50 + azar.nextInt(AreaJuego.ALTO - 50), 20 + azar.nextInt(10),
-                estado.velocidadX() + azar.nextInt(4),
-                estado.velocidadY() + azar.nextInt(4)));
+    public Partida(EstadoPartida estado, ServiciosPartida recursos,
+                   ControlesNave controles, Random azar) {
+        Objects.requireNonNull(estado, "estado");
+        this.recursos = Objects.requireNonNull(recursos, "recursos");
+        Objects.requireNonNull(azar, "azar");
+        nave = recursos.crearNave(AreaJuego.ANCHO / 2 - 22, 30,
+            estado.vidas(), controles);
+        puntaje = estado.puntaje();
+        for (int i = 0; i < estado.navesEnemigas(); i++) {
+            int x = azar.nextInt(AreaJuego.ANCHO - 60);
+            int y = 160 + azar.nextInt(AreaJuego.ALTO - 220);
+            int velocidadX = estado.velocidadX() + azar.nextInt(3);
+            int velocidadY = estado.velocidadY() + azar.nextInt(3);
+            enemigos.add(recursos.crearNaveEnemiga(i % 3 == 0, x, y,
+                velocidadX, velocidadY));
         }
     }
 
-    @Override
-    public void agregarBala(Bullet bala) { balas.add(bala); }
+    public Partida(EstadoPartida estado, ServiciosPartida recursos,
+                   ControlesNave controles) {
+        this(estado, recursos, controles, new Random());
+    }
+
+    @Override public void agregarBala(Bullet bala) { balas.add(bala); }
 
     public void actualizar(float delta) {
+        if (!Float.isFinite(delta) || delta <= 0 || nave.estaDestruido()) return;
         nave.update(delta, this);
+        for (NaveEnemiga enemigo : enemigos) {
+            enemigo.update(delta, nave.getCentroX(), nave.getCentroY(), balas);
+        }
+        actualizarDisparos(delta);
+        resolverColisionesEntreEnemigos();
+        for (NaveEnemiga enemigo : enemigos) nave.checkCollision(enemigo);
+    }
+
+    private void actualizarDisparos(float delta) {
         for (int i = 0; i < balas.size(); i++) {
             Bullet bala = balas.get(i);
             bala.update(delta);
-            for (int j = 0; j < asteroides.size(); j++) {
-                if (bala.checkCollision(asteroides.get(j))) {
-                    bala.destruir();
+            if (bala.esOrigenJugador()) {
+                for (int j = 0; j < enemigos.size(); j++) {
+                    NaveEnemiga enemigo = enemigos.get(j);
+                    if (!bala.checkCollision(enemigo)) continue;
                     recursos.reproducirExplosion();
-                    asteroides.remove(j--);
-                    puntaje += 10;
+                    if (enemigo.recibirImpacto(1)) {
+                        puntaje += enemigo.getPuntajeRecompensa();
+                        enemigos.remove(j);
+                    }
+                    break;
                 }
+            } else {
+                nave.checkCollision(bala);
             }
             if (bala.isDestroyed()) balas.remove(i--);
         }
-        for (Asteroide asteroide : asteroides) asteroide.update(delta);
-        for (int i = 0; i < asteroides.size(); i++) {
-            for (int j = i + 1; j < asteroides.size(); j++) {
-                asteroides.get(i).checkCollision(asteroides.get(j));
+    }
+
+    private void resolverColisionesEntreEnemigos() {
+        for (int i = 0; i < enemigos.size(); i++) {
+            for (int j = i + 1; j < enemigos.size(); j++) {
+                enemigos.get(i).checkCollision(enemigos.get(j));
             }
-        }
-        for (int i = 0; i < asteroides.size(); i++) {
-            if (nave.checkCollision(asteroides.get(i))) asteroides.remove(i--);
         }
     }
 
     public void dibujar(SpriteBatch batch) {
         for (Bullet bala : balas) bala.draw(batch);
         nave.draw(batch);
-        for (Asteroide asteroide : asteroides) asteroide.draw(batch);
+        for (NaveEnemiga enemigo : enemigos) enemigo.draw(batch);
     }
 
     public int vidas() { return nave.getVidas(); }
     public int puntaje() { return puntaje; }
+    public int cantidadEnemigos() { return enemigos.size(); }
     public boolean terminada() { return nave.estaDestruido(); }
-    public boolean rondaCompletada() { return asteroides.isEmpty() && vidas() > 0; }
+    public boolean rondaCompletada() { return enemigos.isEmpty() && vidas() > 0; }
 }
