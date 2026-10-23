@@ -68,10 +68,6 @@ public class Nave4 implements Colisionable {
     }
 
     public void dispose() {
-        sonidoHerido.dispose();
-        soundBala.dispose();
-        txBala.dispose();
-        spr.getTexture().dispose();
     }
 
     public boolean checkCollision(NaveEnemiga enemigo) {

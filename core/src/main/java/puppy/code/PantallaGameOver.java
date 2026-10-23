@@ -33,7 +33,7 @@ public class PantallaGameOver implements Screen {
 		game.getBatch().end();
 
 		if (Gdx.input.isTouched() || Gdx.input.isKeyJustPressed(Input.Keys.ANY_KEY)) {
-			Screen ss = new PantallaJuego(game,1,3,0,1,1,10);
+			Screen ss =new PantallaJuegoBuilder(game).build();
 			ss.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 			game.setScreen(ss);
 			dispose();

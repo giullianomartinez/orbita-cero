@@ -19,61 +19,54 @@ public class PantallaJuego implements Screen {
     private OrthographicCamera camera;
     private Viewport viewport;
     private SpriteBatch batch;
-    private Texture txNaveCaza;
-    private Texture txNaveArtillera;
-    private Texture txBalaEnemiga;
-    private Sound explosionSound;
-    private Music gameMusic;
+    private GestorRecursos recursos;
     private int score;
     private int ronda;
-    private int velXAsteroides;
-    private int velYAsteroides;
-    private int cantAsteroides;
+    private int velXEnemigos;
+    private int velYEnemigos;
+    private int cantidadEnemigos;
     private Nave4 nave;
     private ArrayList<NaveEnemiga> enemigos = new ArrayList<>();
     private ArrayList<Bullet> balas = new ArrayList<>();
 
-    public PantallaJuego(SpaceNavigation game, int ronda, int vidas, int score, int velXAsteroides, int velYAsteroides, int cantAsteroides) {
+    public PantallaJuego(SpaceNavigation game, int ronda, int vidas, int score, int velXEnemigos, int velYEnemigos, int cantEnemigos) {
+    
         this.game = game;
         this.ronda = ronda;
         this.score = score;
-        this.velXAsteroides = velXAsteroides;
-        this.velYAsteroides = velYAsteroides;
-        this.cantAsteroides = 1 + (ronda * 2);
+        
+   		this.velXEnemigos = velXEnemigos;
+		this.velYEnemigos = velYEnemigos;
+		this.cantidadEnemigos = cantidadEnemigos;
+		
+		recursos = GestorRecursos.getInstancia();
+		
         batch = game.getBatch();
         camera = new OrthographicCamera();
         viewport = new FitViewport(AreaJuego.ANCHO, AreaJuego.ALTO, camera);
         viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
-        explosionSound = Gdx.audio.newSound(Gdx.files.internal("explosion.ogg"));
-        explosionSound.setVolume(1, 0.5f);
-        gameMusic = Gdx.audio.newMusic(Gdx.files.internal("piano-loops.wav"));
-        gameMusic.setLooping(true);
-        gameMusic.setVolume(0.5f);
-        gameMusic.play();
-        nave = new Nave4(400 - 22, 30, new Texture(Gdx.files.internal("MainShip3.png")), Gdx.audio.newSound(Gdx.files.internal("hurt.ogg")), new Texture(Gdx.files.internal("Rocket2.png")), Gdx.audio.newSound(Gdx.files.internal("pop-sound.mp3")), vidas, new ControlesTecladoNave(viewport));
-        txNaveCaza = cargarTexturaSegura("nave_caza.png", "MainShip3.png");
-        txNaveArtillera = cargarTexturaSegura("nave_artillera.png", "MainShip3.png");
-        txBalaEnemiga = new Texture(Gdx.files.internal("Rocket2.png"));
+        
+        
+
+        nave = new Nave4(400 - 22,30,recursos.getTexturaNave(),recursos.getSonidoHerido(),recursos.getTexturaBala(),recursos.getSonidoDisparo(),vidas,new ControlesTecladoNave(viewport));
+        
         Random r = new Random();
-        for (int i = 0; i < cantAsteroides; i++) {
+        for (int i = 0; i < cantidadEnemigos; i++) {
             int posX = r.nextInt(AreaJuego.ANCHO - 60);
             int posY = 160 + r.nextInt(AreaJuego.ALTO - 220);
-            int velX = velXAsteroides + r.nextInt(3);
-            int velY = velYAsteroides + r.nextInt(3);
+            int velX = velXEnemigos + r.nextInt(3);
+            int velY = velYEnemigos + r.nextInt(3);
             if (i % 3 == 0) {
-                enemigos.add(new NaveArtillera(posX, posY, velX, velY, txNaveArtillera));
+               enemigos.add(new NaveArtillera(posX,posY,velX,velY,recursos.getTexturaNaveArtillera()));
+      
             } else {
-                enemigos.add(new NaveCaza(posX, posY, velX, velY, txNaveCaza));
+            	enemigos.add(new NaveCaza(posX,posY,velX,velY,recursos.getTexturaNaveCaza()));
+       
             }
         }
     }
 
-    private Texture cargarTexturaSegura(String archivoPreferido, String archivoRespaldo) {
-        if (Gdx.files.internal(archivoPreferido).exists()) {
-            return new Texture(Gdx.files.internal(archivoPreferido));
-        }
-        return new Texture(Gdx.files.internal(archivoRespaldo));
-    }
+    
 
     public void dibujaEncabezado() {
         CharSequence str = "Vidas: " + nave.getVidas() + "  Ronda: " + ronda;
@@ -100,7 +93,7 @@ public class PantallaJuego implements Screen {
                 for (int j = 0; j < enemigos.size(); j++) {
                     NaveEnemiga enemigo = enemigos.get(j);
                     if (b.checkCollision(enemigo)) {
-                        explosionSound.play();
+                        recursos.getSonidoExplosion().play();
                         if (enemigo.recibirImpacto(1)) {
                             score += enemigo.getPuntajeRecompensa();
                             enemigos.remove(j);
@@ -118,7 +111,7 @@ public class PantallaJuego implements Screen {
             }
         }
         for (NaveEnemiga enemigo : enemigos) {
-            enemigo.update(paso, nave.getCentroX(), nave.getCentroY(), txBalaEnemiga, balas);
+            enemigo.update(paso, nave.getCentroX(), nave.getCentroY(), recursos.getTexturaBala(), balas);
         }
         for (int i = 0; i < enemigos.size(); i++) {
             NaveEnemiga e1 = enemigos.get(i);
@@ -150,7 +143,19 @@ public class PantallaJuego implements Screen {
             return;
         }
         if (enemigos.isEmpty() && nave.getVidas() > 0) {
-            Screen ss = new PantallaJuego(game, ronda + 1, nave.getVidas(), score, velXAsteroides + 1, velYAsteroides + 1, cantAsteroides + 2);
+            Screen ss =
+		    new PantallaJuegoBuilder(game)
+		        .ronda(ronda + 1)
+		        .vidas(nave.getVidas())
+		        .score(score)
+		        .velocidadEnemigos(
+		            velXEnemigos + 1,
+		            velYEnemigos + 1
+		        )
+		        .cantidadEnemigos(
+		            cantidadEnemigos + 2
+		        )
+		        .build();
             ss.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
             game.setScreen(ss);
             dispose();
@@ -163,7 +168,7 @@ public class PantallaJuego implements Screen {
 
     @Override
     public void show() {
-        gameMusic.play();
+        recursos.getMusicaJuego().play();
     }
 
     @Override
@@ -185,11 +190,5 @@ public class PantallaJuego implements Screen {
 
     @Override
     public void dispose() {
-        this.explosionSound.dispose();
-        this.gameMusic.dispose();
-        this.txNaveCaza.dispose();
-        this.txNaveArtillera.dispose();
-        this.txBalaEnemiga.dispose();
-        this.nave.dispose();
     }
 }
