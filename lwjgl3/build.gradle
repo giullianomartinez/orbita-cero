@@ -42,7 +42,9 @@ def os = System.properties['os.name'].toLowerCase()
 
 run {
   workingDir = rootProject.file('assets').path
-  setIgnoreExitValue(true)
+  javaLauncher = javaToolchains.launcherFor {
+    languageVersion = JavaLanguageVersion.of(11)
+  }
 
   if (os.contains('mac')) jvmArgs += "-XstartOnFirstThread"
 }

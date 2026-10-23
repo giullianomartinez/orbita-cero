@@ -24,7 +24,7 @@ public final class PantallaMenu implements Screen {
         camera.update();
         game.getBatch().setProjectionMatrix(camera.combined);
         game.getBatch().begin();
-        game.getFont().draw(game.getBatch(), "Orbita Cero: Asalto de Naves", 140, 440);
+        game.getFont().draw(game.getBatch(), "Orbita Cero", 140, 440);
         game.getFont().draw(game.getBatch(), "WASD: mover   Mouse: apuntar   Clic izquierdo: disparar", 100, 360);
         game.getFont().draw(game.getBatch(), "Destruye las naves enemigas y sobrevive a cada ronda.", 100, 310);
         game.getFont().draw(game.getBatch(), "Haz clic o presiona cualquier tecla para comenzar", 100, 250);
