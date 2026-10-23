@@ -52,15 +52,6 @@ public class Bullet implements Colisionable {
         return false;
     }
 
-    public boolean checkCollision(Ball2 b2) {
-        if (spr.getBoundingRectangle().overlaps(b2.getArea())) {
-            // Se destruye
-			this.destroyed = true;
-            return true;
-        }
-        return false;
-    }
-
     @Override
     public Rectangle getArea() {
         return spr.getBoundingRectangle();

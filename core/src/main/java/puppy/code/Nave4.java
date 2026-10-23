@@ -92,16 +92,6 @@ public class Nave4 implements Colisionable {
         return true;
     }
 
-    public boolean checkCollision(Ball2 b) {
-        if (!b.getArea().overlaps(spr.getBoundingRectangle()) || !health.hit()) {
-            return false;
-        }
-        b.setXSpeed(-b.getXSpeed());
-        b.setySpeed(-b.getySpeed());
-        sonidoHerido.play();
-        return true;
-    }
-
     @Override
     public Rectangle getArea() {
         return spr.getBoundingRectangle();
