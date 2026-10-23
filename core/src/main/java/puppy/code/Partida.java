@@ -22,6 +22,9 @@ public final class Partida implements ReceptorDisparos {
         Objects.requireNonNull(azar, "azar");
         nave = recursos.crearNave(AreaJuego.ANCHO / 2 - 22, 30,
             estado.vidas(), controles);
+        if (estado.ronda() >= 3) {
+            nave.setEstrategiaDisparo(new DisparoTriple());
+        }
         puntaje = estado.puntaje();
         for (int i = 0; i < estado.navesEnemigas(); i++) {
             int x = azar.nextInt(AreaJuego.ANCHO - 60);
