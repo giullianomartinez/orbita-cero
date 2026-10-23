@@ -4,49 +4,58 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
 
+/** Proyectil que conserva su origen y expone una colisión común para las naves. */
+public final class Bullet implements Colisionable {
+    private final float velocidadX;
+    private final float velocidadY;
+    private final boolean origenJugador;
+    private final Sprite sprite;
+    private boolean destruida;
 
-public class Bullet {
+    public Bullet(float centroX, float centroY, float velocidadX, float velocidadY,
+                  Texture textura) {
+        this(centroX, centroY, velocidadX, velocidadY, textura, true);
+    }
 
-	private float xSpeed;
-	private float ySpeed;
-	private boolean destroyed = false;
-	private Sprite spr;
+    public Bullet(float centroX, float centroY, float velocidadX, float velocidadY,
+                  Texture textura, boolean origenJugador) {
+        this.velocidadX = velocidadX;
+        this.velocidadY = velocidadY;
+        this.origenJugador = origenJugador;
+        sprite = new Sprite(textura);
+        sprite.setPosition(centroX - sprite.getWidth() / 2f,
+            centroY - sprite.getHeight() / 2f);
+        sprite.setOriginCenter();
+        sprite.setRotation(MathUtils.atan2(velocidadY, velocidadX)
+            * MathUtils.radiansToDegrees - 90f);
+        if (!origenJugador) sprite.setColor(1f, 0.35f, 0.25f, 1f);
+    }
 
-	    public Bullet(float centroX, float centroY, float xSpeed, float ySpeed, Texture tx) {
-	    	spr = new Sprite(tx);
-        spr.setPosition(centroX - spr.getWidth() / 2,
-            centroY - spr.getHeight() / 2);
-	        this.xSpeed = xSpeed;
-	        this.ySpeed = ySpeed;
-	        spr.setOriginCenter();
-	        spr.setRotation(MathUtils.atan2(ySpeed, xSpeed) * MathUtils.radiansToDegrees - 90);
-	    }
-	    public void update(float delta) {
-	        spr.setPosition(spr.getX()+xSpeed*delta, spr.getY()+ySpeed*delta);
-	        if (spr.getX() < 0 || spr.getX()+spr.getWidth() > AreaJuego.ANCHO) {
-	            destroyed = true;
-	        }
-	        if (spr.getY() < 0 || spr.getY()+spr.getHeight() > AreaJuego.ALTO) {
-	        	destroyed = true;
-	        }
+    public void update(float delta) {
+        if (destruida || !Float.isFinite(delta) || delta <= 0) return;
+        sprite.setPosition(sprite.getX() + velocidadX * delta,
+            sprite.getY() + velocidadY * delta);
+        if (sprite.getX() < 0 || sprite.getX() + sprite.getWidth() > AreaJuego.ANCHO
+                || sprite.getY() < 0
+                || sprite.getY() + sprite.getHeight() > AreaJuego.ALTO) {
+            destruir();
+        }
+    }
 
-	    }
+    public void draw(SpriteBatch batch) { if (!destruida) sprite.draw(batch); }
 
-	    public void draw(SpriteBatch batch) {
-	    	spr.draw(batch);
-	    }
+    public boolean checkCollision(Colisionable objetivo) {
+        if (!colisionaCon(objetivo)) return false;
+        destruir();
+        return true;
+    }
 
-	    public boolean checkCollision(Ball2 b2) {
-	        if(spr.getBoundingRectangle().overlaps(b2.getArea())){
-	        	// Se destruyen ambos
-	            this.destroyed = true;
-	            return true;
+    public void destruir() { destruida = true; }
+    public boolean isDestroyed() { return destruida; }
+    public boolean esOrigenJugador() { return origenJugador; }
 
-	        }
-	        return false;
-	    }
-
-	    public boolean isDestroyed() {return destroyed;}
-
+    @Override public Rectangle getArea() { return new Rectangle(sprite.getBoundingRectangle()); }
+    @Override public boolean estaDestruido() { return destruida; }
 }
