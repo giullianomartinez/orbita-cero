@@ -29,7 +29,7 @@ public class PantallaJuego implements Screen {
     private ArrayList<NaveEnemiga> enemigos = new ArrayList<>();
     private ArrayList<Bullet> balas = new ArrayList<>();
 
-    public PantallaJuego(SpaceNavigation game, int ronda, int vidas, int score, int velXEnemigos, int velYEnemigos, int cantEnemigos) {
+    public PantallaJuego(SpaceNavigation game, int ronda, int vidas, int score, int velXEnemigos, int velYEnemigos, int cantidadEnemigos) {
     
         this.game = game;
         this.ronda = ronda;
