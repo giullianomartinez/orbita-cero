@@ -49,6 +49,9 @@ public class PantallaJuego implements Screen {
         
 
         nave = new Nave4(400 - 22,30,recursos.getTexturaNave(),recursos.getSonidoHerido(),recursos.getTexturaBala(),recursos.getSonidoDisparo(),vidas,new ControlesTecladoNave(viewport));
+        if (ronda >= 3) {
+            nave.setEstrategiaDisparo(new DisparoTriple());
+        }
         
         Random r = new Random();
         for (int i = 0; i < cantidadEnemigos; i++) {
