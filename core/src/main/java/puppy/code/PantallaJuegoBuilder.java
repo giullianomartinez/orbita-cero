@@ -1,50 +1,64 @@
 package puppy.code;
 
-import java.util.Objects;
+public class PantallaJuegoBuilder {
 
-/** Construye una pantalla con los datos inmutables de una ronda. */
-public final class PantallaJuegoBuilder {
-    private final SpaceNavigation game;
+    private SpaceNavigation game;
+
     private int ronda = 1;
     private int vidas = 3;
-    private int puntaje;
-    private int velocidadX = 1;
-    private int velocidadY = 1;
-    private int navesEnemigas = 10;
+    private int score = 0;
+
+    private int velXEnemigos = 1;
+    private int velYEnemigos = 1;
+
+    private int cantidadEnemigos = 10;
 
     public PantallaJuegoBuilder(SpaceNavigation game) {
-        this.game = Objects.requireNonNull(game, "game");
+        this.game = game;
     }
 
-    public PantallaJuegoBuilder(SpaceNavigation game, EstadoPartida estado) {
-        this.game = Objects.requireNonNull(game, "game");
-        Objects.requireNonNull(estado, "estado");
-        ronda = estado.ronda();
-        vidas = estado.vidas();
-        puntaje = estado.puntaje();
-        velocidadX = estado.velocidadX();
-        velocidadY = estado.velocidadY();
-        navesEnemigas = estado.navesEnemigas();
-    }
-
-    public PantallaJuegoBuilder ronda(int ronda) { this.ronda = ronda; return this; }
-    public PantallaJuegoBuilder vidas(int vidas) { this.vidas = vidas; return this; }
-    public PantallaJuegoBuilder puntaje(int puntaje) { this.puntaje = puntaje; return this; }
-
-    public PantallaJuegoBuilder velocidadNaves(int velocidadX, int velocidadY) {
-        this.velocidadX = velocidadX;
-        this.velocidadY = velocidadY;
+    public PantallaJuegoBuilder ronda(int ronda) {
+        this.ronda = ronda;
         return this;
     }
 
-    public PantallaJuegoBuilder cantidadNaves(int cantidad) {
-        navesEnemigas = cantidad;
+    public PantallaJuegoBuilder vidas(int vidas) {
+        this.vidas = vidas;
+        return this;
+    }
+
+    public PantallaJuegoBuilder score(int score) {
+        this.score = score;
+        return this;
+    }
+
+    public PantallaJuegoBuilder velocidadEnemigos(
+            int velocidadX,
+            int velocidadY) {
+
+        this.velXEnemigos = velocidadX;
+        this.velYEnemigos = velocidadY;
+
+        return this;
+    }
+
+    public PantallaJuegoBuilder cantidadEnemigos(
+            int cantidadEnemigos) {
+
+        this.cantidadEnemigos = cantidadEnemigos;
         return this;
     }
 
     public PantallaJuego build() {
-        EstadoPartida estado = EstadoPartida.crear(ronda, vidas, puntaje,
-            velocidadX, velocidadY, navesEnemigas);
-        return new PantallaJuego(game, estado);
+
+        return new PantallaJuego(
+                game,
+                ronda,
+                vidas,
+                score,
+                velXEnemigos,
+                velYEnemigos,
+                cantidadEnemigos
+        );
     }
 }
